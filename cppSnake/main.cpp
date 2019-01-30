@@ -11,6 +11,7 @@ using namespace std;
 enum eStatus {APPROVED = 0, DISAPPROVED, UNRECOGNIZED};
 
 int playAgain();
+void showCursor(bool wantCursor);
 
 // Class that defines the necessary components of the snake game
 class Snake
@@ -385,23 +386,13 @@ class Snake
 			cout << "Use '-' to speed up the game and '+' to slow down the game" << endl;
 			cout << "Eating the fruit makes the snake longer. If you hit your own tail, the game will end." << endl;
 			cout << "Created by Yun Ho Jung, github.com/Dolcevice" << endl;
-			cout << "Inspired from orignal code by N. Vitanovic, at https://www.youtube.com/watch?v=E_-lMZDi7Uw" << endl;
+			cout << "Licensed by GNU General Public License v3.0" << endl;
+			cout << "Inspired from original code by N. Vitanovic, at https://www.youtube.com/watch?v=E_-lMZDi7Uw" << endl;
 			cout << "But I pretty much rewrote the most things" << endl;
 			cout << "************************************************************" << endl;
         }
 
 };
-
-void showCursor(bool wantCursor)
-{
-    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    CONSOLE_CURSOR_INFO cursorInfo;
-
-    GetConsoleCursorInfo(out, &cursorInfo);
-    cursorInfo.bVisible = wantCursor; // Set the cursor visibility
-    SetConsoleCursorInfo(out, &cursorInfo);
-}
 
 // Main!
 int main()
@@ -497,3 +488,13 @@ int playAgain()
 	return result;
 }
 
+void showCursor(bool wantCursor)
+{
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_CURSOR_INFO cursorInfo;
+
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = wantCursor; // Set the cursor visibility
+    SetConsoleCursorInfo(out, &cursorInfo);
+}
