@@ -1,17 +1,18 @@
-// CS1337.010 - Yun Ho Jung
-// Assignment 1 - Snake Game
+// Yun Ho Jung - github.com/Dolcevice
+// CPP - Snake Game
 // GNU General Public License v3.0
+// Unattributed Replication of the content is forbidden
+// Inspired from original code by N. Vitanovic, at https://www.youtube.com/watch?v=E_-lMZDi7Uw
 
 #include <iostream>
-#include <conio.h> // for _kbhit and _getch in the input routine
-#include <windows.h> // for the sleep function in main
+// For console related activities
+#include <conio.h>
+#include <windows.h>
+// For user input sanitization
+#include <string>
+#include <sstream>
 
 using namespace std;
-
-enum eStatus {APPROVED = 0, DISAPPROVED, UNRECOGNIZED};
-
-int playAgain();
-void showCursor(bool wantCursor);
 
 // Class that defines the necessary components of the snake game
 class Snake
@@ -19,38 +20,46 @@ class Snake
 	public:
 
 	// Defining constant variables for the snake class
-		const int width = 20; // Width of the game screen
-		const int height = 20; // Height of the game screen
+		const int width = 60; // Width of the game screen
+		const int height = 9; // Height of the game screen
 
 	// Defining variables for the snake class
+		// The coordinates for the head of the snake
 		int headX = width / 2;
-		int headY = height / 2; // Head of the snake
+		int headY = height / 2;
 		int score = 0; // Player's score
 		int nTail = 0; // Length of the tail
-		int sleepAmt = 33; // Time the program idles before creating another frame
-		//33 is 30 frames per second
+		int updateDelay = 33; // Time the program idles before creating another frame - 33 is 30 frames per second
 		int fruitMax = 1; // How many fruits are in game at a time
+
 		bool gameover = false; // Flag for the status of the game
 		bool pause = false; // Flag if the game is paused
+		bool isEasy;
 
 
-	// Creating the array that holds the potential positions of tail elements
-		int tailX[100], tailY[100]; // Two hundred by hundred arrays for the tail location
+	// Creating the array that holds the potential positions of tail elements 100x100
+		int tailX[100] = { 0 }; // Initialize to 0 so we don't end up accessing random memory locations
+		int tailY[100] = { 0 };
+
 		int fruitX[5], fruitY[5]; // Coordinates of the fruit - up to 5 fruits at once
+
 	// Creating the enumeration for the snake class
-		enum eDirection { STOPPED = 0, LEFT, RIGHT, UP, DOWN}; // Numerized directions of the snake
-		eDirection dir = STOPPED; // Creating an enumeration object dir
+		enum eDirection { STOPPED = 0, LEFT, RIGHT, UP, DOWN}; // Enumerated directions of the snake
+		eDirection dir = STOPPED; // Creating an enumeration object direction
+		eDirection currentDir = STOPPED; // This second direction variable will be used to prevent a 180 suicide of the snake
+
 
 	// Function that draws the horizontal wall
 		void drawHorizontalWall()
 		{
-			// Draws 22 #s
-			cout << "#####################" << endl;
+			// Draws 61 #s
+			// This is more efficient
+			cout << "#############################################################" << endl;
 
 			// This comment is a for loop for drawing the horizontal wall. Because this is inefficient then just printing a set amount of #s, I will leave it there.
 			// This may be used when width is changed.
 			/*
-			for (int i = 0; i < width+2; i++)
+			for (int wallCount = 0; wallCount < width+1; wallCount++)
 				cout << "#";
 			cout << endl;
 			*/
@@ -100,6 +109,7 @@ class Snake
 						// If the coordinate matches the tail coordinate, print the tails
 						for (int tailElementCounter = 0; tailElementCounter < nTail; tailElementCounter++)
 						{
+						    // For x coordinates
 						    if (tailX[tailElementCounter] == col && tailY[tailElementCounter] == row)
                             {
                                 cout << "o";
@@ -125,9 +135,15 @@ class Snake
 			}
 			// Draw the bottom wall
 			drawHorizontalWall();
-			// Show the score of the player
+			// Show the score of the player and other useful information
 			cout << "Score:" << score << endl;
-			cout << "Current SleepAmt: " << sleepAmt << endl;
+			// Shows the update delay and fps. FPS is calculated by 1000 / delay in milliseconds
+			cout << "Current updateDelay: " << updateDelay << " (FPS: " << 1000.0f / float(updateDelay) << ")" << endl;
+			cout << "WASD to move, eat the fruit to grow the snake as long as possible!" << endl;
+			cout << "Press '-' speed up the game and '=' to slow down the game" << endl;
+			cout << "Press 'p' to pause" << endl;
+			cout << "Press 'x' to exit" << endl;
+
 		} // End Function
 
 	// Function that takes the input from the keyboard and modifies the direction
@@ -160,35 +176,34 @@ class Snake
 						pause = true;
 						break;
 					case '+': // Increase the amount of time the game sleeps before creating another frame
-						if (Snake::sleepAmt < 200) // Max is 200
+						if (updateDelay < 200) // Max is 200
 						{
-							Snake::sleepAmt += 20;
-							cout << "Increasing sleepAmt to " << sleepAmt << endl;
+							updateDelay += 20;
+							cout << "Increasing updateDelay to " << updateDelay << endl;
 						}
 						else
 						{
-							cout << "sleepAmt is already at maximum." << endl;
+							cout << "updateDelay is already at maximum." << endl;
 						}
 						break;
 					case '-': // Decrease the amount of time the game sleeps before creating another frame
-						if (sleepAmt > 20) // Minimum is 20
+						if (updateDelay > 20) // Minimum is 20
 						{
-							sleepAmt -= 20;
-							cout << "Decreasing sleepAmt to " << sleepAmt << endl;
+							updateDelay -= 20;
+							cout << "Decreasing updateDelay to " << updateDelay << endl;
 						}
 						else
 						{
-							cout << "sleepAmt is already at minimum." << endl;
+							cout << "updateDelay is already at minimum." << endl;
 						}
 						break;
 					default:
 						break;
-				} // End switch
+				} // End Switch
 			} // End if
 		} // End Function
 
-		// This variable will be used to prevent a 180 suicide of the snake
-		eDirection currentDir = STOPPED;
+
 		// Previous positions of the snake's head
 
 		// Temporary storage for position
@@ -197,6 +212,7 @@ class Snake
 		// Function that deals with the logic of the snake game
 		void moveSnake()
 		{
+		    // Store
 		    int prevX = tailX[0];
             int prevY = tailY[0];
             int holdX;
@@ -208,7 +224,7 @@ class Snake
 			// Then, same transfer of location is used for just the tails.
 			for (int elementCount = 1; elementCount < nTail; elementCount++) // We start from 1 since we already took care of 0 above
 			{
-			    holdX = tailX[elementCount]; // Store thetail's position into temporary storage.
+			    holdX = tailX[elementCount]; // Store the tail's position into temporary storage.
 				holdY = tailY[elementCount]; // Same for the vertical coordinates
 			    tailX[elementCount] = prevX; // The tail's position becomes the previous coordinates
 				tailY[elementCount] = prevY; // Same for vertical coordinates
@@ -259,6 +275,7 @@ class Snake
 			switch (dir)
 			{
 				// Cases depend on the direction
+				// Change the coordinates depending on the direction, then change current direction
                 case LEFT:
                     headX--;
                     currentDir = LEFT;
@@ -282,15 +299,47 @@ class Snake
                 default:
                     break;
 				// Otherwise, do nothing
-			}// End switch
+			}
 		} // End function
 
 		void checkBoundWrapSnake()
 		{
-			// Because game does not end when the snake hits the wall, we allow the snake to wrap around the wall
-			if (headX >= width) headX = 1; else if (headX < 1) headX = width - 2;
-			if (headY >= height) headY = 0; else if (headY < 0) headY = height - 2;
-		}
+			// If the game is on easymode, let the snake wrap around the wall
+			if (isEasy)
+			{
+				if (headX >= width)
+				{
+					headX = 1; // Wrap to beginning
+				}
+				else if (headX < 1)
+				{
+					headX = width - 2; // Wrap to the end
+				}
+				if (headY >= height)
+				{
+					headY = 0; // Wrap to the beginning
+				}
+				else if (headY < 0)
+				{
+					headY = height - 2; // Wrap to the end
+				}
+			// If the game is on normal mode, gameover if collision with wall
+			}
+			else
+			{
+			    // End the game if hit the wall
+			    if (headX >= width || headX < 1)
+				{
+					gameover = true;
+				}
+			    else if (headY >= height || headY < 0)
+				{
+					gameover = true;
+				}
+
+			} // End if
+		}// End function
+
 		// Function that checks if the snake ate the fruit and updates the length of the snake
 		void eatFruitSnake()
 		{
@@ -302,7 +351,7 @@ class Snake
 				{
 					score += 10; // Plus 10 to the score!
 					nTail++; // Increase the tail length
-					generateFruitSnake(fruitCount);
+					generateFruitSnake(fruitCount); // Generate a replacement fruit
 				}
 			}
 		}
@@ -311,6 +360,7 @@ class Snake
 		{
 			for (int tailCount = 0; tailCount < nTail; tailCount++)
 			{
+			    // If the tail is longer than 2 and it's positions overlap
 				if (nTail > 2 && tailX[tailCount] == headX && tailY[tailCount] == headY)
 				{
 					gameover = true;
@@ -327,6 +377,7 @@ class Snake
 			// Make sure they don't overlap with any other fruit
 			for (int xCount = 0; xCount < fruitMax; xCount++)
 			{
+			    // If they overlap, try somewhere else
 				if (xCount != fruitCount && fruitX[xCount] == fruitX[fruitCount])
 				{
 					fruitX[fruitCount] = rand() % width;
@@ -334,167 +385,229 @@ class Snake
 			}
 			for (int yCount = 0; yCount < fruitMax; yCount++)
 			{
+			    // Same for vertical coordinates
+			    // I personally don't want the fruits to be on the same row or column
 				if (yCount != fruitCount && fruitY[yCount] == fruitY[fruitCount])
 				{
 					fruitY[fruitCount] = rand() % height;
 				}
-
+            // This may become a problem when there are too many fruits
+            // For now this is fine
 			}
 		} // End function
+
+		// Function that generals ALL the fruits
+		void generateFruitInALoop(int fruitMax)
+		{   // Loop for the number of fruits
+			for (int fruitCount = 0; fruitCount < fruitMax; fruitCount++)
+			{
+			    // Call generation method
+				generateFruitSnake(fruitCount);
+			}
+		}
+
+
 		// Function that allows the user to customize the game
 		int customizeSnake()
 		{
 			// Variable that holds user's choice
-			char userChoiceOfFruit;
+			string userChoiceOfFruit;
 			int convertedChoiceOfFruit;
+
 			while (true)
 			{
 				cout << "Enter the number of fruits to be spawned, 1 to 5: " << endl;
-				cin.get(userChoiceOfFruit);
+				getline(cin, userChoiceOfFruit);
+
+				stringstream ssChoice(userChoiceOfFruit);
+
 				// Check if cin failed
-				if (!cin.good())
+				if (!(ssChoice >> convertedChoiceOfFruit))
 				{
 					cin.clear();
-					cin.ignore(INT_MAX, '\n');
 					cout << "Please enter a valid number" << endl;
 					continue;
 				}
 				// Check if the input was between 1 to 5
-				else if (int(userChoiceOfFruit) > 53 || int(userChoiceOfFruit) < 49) // 53 == 5, 49 == 1 in ASCII
+				else if (convertedChoiceOfFruit > 5 || convertedChoiceOfFruit < 1)
 				{
-					cin.clear();
-					cin.ignore(INT_MAX, '\n');
 					cout << "Please enter a number between 1 and 5" << endl;
 					continue;
 				}
 				else
 				{
-				    cin.clear();
-					cin.ignore(INT_MAX, '\n');
 					break;
 				}
 			} // End loop
-            convertedChoiceOfFruit = int(userChoiceOfFruit) - 48;
 			return convertedChoiceOfFruit; // This will return the number of fruit to be spawned - converts from the ascii code.
 		} // End function
 
+        // Function that allows the users to choose easy mode
+		void easyMode()
+		{
+		    // Define a variable that holds user choice
+			string userChoice;
+
+			while (true)
+			{
+			    // Prompt user
+				cout << "Turn easymode - no gameover for hitting the wall - on? (y/n)" << endl;
+				getline(cin, userChoice);
+
+				if (userChoice == "y" || userChoice == "Y")
+				{
+					isEasy = true;
+					break;
+				}
+				else if (userChoice == "n" || userChoice == "N")
+				{
+					isEasy = false;
+					break;
+				}
+				else
+				{   // Ask again if invalid input
+					cin.clear();
+					cout << "Invalid input" << endl;
+				}
+			}
+		}
+
 		// Function that shows the tutorial for the game
-		void tutorialSnake()
+
+};
+
+// Class that deal with extra functions
+class ExtraFunctions
+{
+	public:
+        // Enumeration that contains better readability for status
+		enum eStatus {APPROVED = 0, DISAPPROVED, UNRECOGNIZED};
+        // Function that prints out the tutorial
+		void tutorial()
 		{
 			cout << "Welcome to C++ Snake!" << endl;
 			cout << "Use WASD to move, P to pause, and X to exit the game" << endl;
 			cout << "Use '-' to speed up the game and '+' to slow down the game" << endl;
 			cout << "Eating the fruit makes the snake longer. If you hit your own tail, the game will end." << endl;
 			cout << "Created by Yun Ho Jung, github.com/Dolcevice" << endl;
-			cout << "Licensed by GNU General Public License v3.0" << endl;
-			cout << "Inspired from original code by N. Vitanovic, at https://www.youtube.com/watch?v=E_-lMZDi7Uw" << endl;
+			cout << "Inspired from orignal code by N. Vitanovic, at https://www.youtube.com/watch?v=E_-lMZDi7Uw" << endl;
 			cout << "But I pretty much rewrote the most things" << endl;
 			cout << "************************************************************" << endl;
-        }
+		}
+        // Function that can enable or disable cursor
+		void showCursor(bool wantCursor)
+		{
+		    // Create a new handle object
+			HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+            // Create a new console_cursor_info object
+			CONSOLE_CURSOR_INFO cursorInfo;
+			GetConsoleCursorInfo(out, &cursorInfo);
+			cursorInfo.bVisible = wantCursor; // Set the cursor visibility depending on the bool that is passed in
+			SetConsoleCursorInfo(out, &cursorInfo);
+		}
+        // Function that takes in the user choice for replay
+		int replayPrompt()
+		{
+		    // Create variables that hold user input and status
+			string userResponse;
+			eStatus result;
+            // Prompt user
+			cout << "Would you like to play again? Enter 'y' to play again or 'n' to exit " << endl;
+			// Get user choice
+			getline(cin, userResponse);
+            // Branching check
+			if (userResponse == "y" || userResponse == "Y")
+			{
+				result = APPROVED;
+			}
+			else if (userResponse == "n" || userResponse == "N")
+			{
+
+				result = DISAPPROVED;
+			}
+			else
+			{
+				cin.clear();
+				result = UNRECOGNIZED;
+			}
+
+			return result;
+		}
+        // Function that replays the game depending on the result from replay prompt
+		void replay()
+		{
+		    // Loop
+			while(true)
+			{
+			    // Assign the return from replayPrompt to userChoice
+				int userChoice = replayPrompt();
+				// Compare to the enumerated values
+				if (userChoice == UNRECOGNIZED)
+				{
+				    // Loop again
+					cout << "Invalid input: " << endl;
+				}
+				else if(userChoice == DISAPPROVED)
+				{
+				    // Exit the entire program
+					exit(EXIT_SUCCESS);
+				}
+				else if(userChoice == APPROVED)
+				{
+				    // Restart the game
+					break;
+				}
+			}
+		}// End Function
 
 };
 
 // Main!
 int main()
 {
+    // Loop
     while(true)
 	{
-	// Creating object
-        Snake snakeGame; // This should have activated class constructor
+	// Creating objects
+        Snake snakeGame; // Create an object in the Snake class
+		ExtraFunctions ext; // Create an object in the ExtraFunctions class
 
-        snakeGame.tutorialSnake();
-        snakeGame.fruitMax = snakeGame.customizeSnake();
-        showCursor(false);
+        ext.tutorial(); // Call tutorial from ExtraFunctions
+		snakeGame.easyMode(); // Call easyMode from Snake
+        snakeGame.fruitMax = snakeGame.customizeSnake(); //Set fruit max to return value from customizeSnake
+       	snakeGame.generateFruitInALoop(snakeGame.fruitMax); // Generate Fruits based on fruitMax
 
-        for (int fruitCount = 0; fruitCount < snakeGame.fruitMax; fruitCount++)
-        {
-            snakeGame.generateFruitSnake(fruitCount);
-        }
-        // Update game until game over
-
+        // Loop game until game over
         while(!snakeGame.gameover)
         {
-            snakeGame.drawSnake(); // Draw
-            snakeGame.controlSnake(); // Input
+			ext.showCursor(false); // Call showCursor from ExtraFunctions class
+            snakeGame.drawSnake(); // Call drawSnake from Snake Class
+            snakeGame.controlSnake(); // Call controlSnake from Snake Class
             // If pause, pause
             if (snakeGame.pause)
             {
-                system("pause");
+                system("pause"); // Call pause from snake
                 snakeGame.pause = false; // Order windows console to pause - assuming the OS is windows. Then again, we are already using system("cls") anyways so we are assuming that this is windows
             }
             // Logic Steps of the game
             // What these methods do are documented in their respective classes
-            snakeGame.moveSnake();
-            snakeGame.directionSnake();
-            snakeGame.checkBoundWrapSnake();
-            snakeGame.hitOwnTailSnake();
-            snakeGame.eatFruitSnake();
+            snakeGame.moveSnake(); // Call moveSnake from Snake
+            snakeGame.directionSnake(); // Call directionSnake from Snake
+            snakeGame.checkBoundWrapSnake(); // Call checkBoundWrapSnake from Snake
+            snakeGame.hitOwnTailSnake(); // Call hitOwnTailSnake from Snake
+            snakeGame.eatFruitSnake(); // CAll eatFruitSnake from Snake
 
-            Sleep(snakeGame.sleepAmt); // Wait until creating another frame
+            Sleep(snakeGame.updateDelay); // Sleep until creating another frame
         }
 
-        showCursor(true);
-
-		while(true)
-		{
-			int userChoice = playAgain();
-			if (userChoice == 2)
-			{
-				cout << "Invalid input: " << endl;
-			}
-			else if(userChoice == 1)
-			{
-				exit(EXIT_SUCCESS);
-			}
-			else if(userChoice == 0)
-			{
-				break;
-			}
-		}
+        ext.showCursor(true); // Show the cursor again
+		ext.replay(); // Call replay from Extra Functions Class
+		system("cls"); // Clear the screen
 
 	}
 
-    return 0;
-} // End Function
-
-int playAgain()
-{
-	char userResponse;
-	eStatus result;
+    return 0; // The end
+} // End Main
 
 
-	cout << "Would you like to play again? Enter 'y' to play again or 'n' to exit " << endl;
-	cin.get(userResponse);
 
-	if (userResponse == 'y')
-	{
-		cin.clear();
-		cin.ignore(INT_MAX, '\n');
-		result = APPROVED;
-	}
-	else if (userResponse == 'n')
-	{
-		cin.clear();
-		cin.ignore(INT_MAX, '\n');
-		result = DISAPPROVED;
-	}
-	else
-	{
-		cin.clear();
-		cin.ignore(INT_MAX, '\n');
-		result = UNRECOGNIZED;
-	}
-
-	return result;
-}
-
-void showCursor(bool wantCursor)
-{
-    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    CONSOLE_CURSOR_INFO cursorInfo;
-
-    GetConsoleCursorInfo(out, &cursorInfo);
-    cursorInfo.bVisible = wantCursor; // Set the cursor visibility
-    SetConsoleCursorInfo(out, &cursorInfo);
-}
