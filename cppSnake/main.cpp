@@ -1,7 +1,7 @@
 // Yun Ho Jung - github.com/Dolcevice
 // CPP - Snake Game
 // GNU General Public License v3.0
-// Unattributed Replication of the content is forbidden
+// Unattributed replication of the code is forbidden
 // Inspired from original code by N. Vitanovic, at https://www.youtube.com/watch?v=E_-lMZDi7Uw
 
 #include <iostream>
@@ -35,7 +35,6 @@ class Snake
 		bool gameover = false; // Flag for the status of the game
 		bool pause = false; // Flag if the game is paused
 		bool isEasy;
-
 
 	// Creating the array that holds the potential positions of tail elements 100x100
 		int tailX[100] = { 0 }; // Initialize to 0 so we don't end up accessing random memory locations
@@ -121,18 +120,16 @@ class Snake
 						{
 							cout << " ";
 						}
-					}
+					}// End if
 					// Draw the last wall for the row
 					if (col == width - 1)
 					{
 						cout << "#";
 					}
-
-				}
+				}// End loop
 				// Move on to the next row
 				cout << endl;
-
-			}
+			}// End loop
 			// Draw the bottom wall
 			drawHorizontalWall();
 			// Show the score of the player and other useful information
@@ -143,10 +140,10 @@ class Snake
 			cout << "Press '-' speed up the game and '=' to slow down the game" << endl;
 			cout << "Press 'p' to pause" << endl;
 			cout << "Press 'x' to exit" << endl;
-
 		} // End Function
 
-	// Function that takes the input from the keyboard and modifies the direction
+
+        // Function that takes the input from the keyboard and modifies the direction
 		void controlSnake()
 		{
 			// Check for keyboard input
@@ -204,11 +201,6 @@ class Snake
 		} // End Function
 
 
-		// Previous positions of the snake's head
-
-		// Temporary storage for position
-
-
 		// Function that deals with the logic of the snake game
 		void moveSnake()
 		{
@@ -232,6 +224,8 @@ class Snake
 				prevY = holdY; // Same for the vertical coordinates
 			}
 		} // End Function
+
+
 		// Function that changes the coordinates of the snake based on the current direction of the snake
 		void directionSnake()
 		{
@@ -302,6 +296,7 @@ class Snake
 			}
 		} // End function
 
+        // Function that checks if the snake hit the walls, and processes logic depending on the mode
 		void checkBoundWrapSnake()
 		{
 			// If the game is on easymode, let the snake wrap around the wall
@@ -340,6 +335,7 @@ class Snake
 			} // End if
 		}// End function
 
+
 		// Function that checks if the snake ate the fruit and updates the length of the snake
 		void eatFruitSnake()
 		{
@@ -354,7 +350,9 @@ class Snake
 					generateFruitSnake(fruitCount); // Generate a replacement fruit
 				}
 			}
-		}
+		}// End Function
+
+
 		// Function that checks if snake hit its own tail
 		void hitOwnTailSnake()
 		{
@@ -367,7 +365,9 @@ class Snake
 					cout << "You hit your own tail!" << endl;
        			}
    			}
-		}
+		}// End Function
+
+
 		// Function that spawns a fruit of the desired label
 		void generateFruitSnake(int fruitCount)
 		{
@@ -396,6 +396,7 @@ class Snake
 			}
 		} // End function
 
+
 		// Function that generals ALL the fruits
 		void generateFruitInALoop(int fruitMax)
 		{   // Loop for the number of fruits
@@ -404,7 +405,7 @@ class Snake
 			    // Call generation method
 				generateFruitSnake(fruitCount);
 			}
-		}
+		}// End Function
 
 
 		// Function that allows the user to customize the game
@@ -442,6 +443,7 @@ class Snake
 			return convertedChoiceOfFruit; // This will return the number of fruit to be spawned - converts from the ascii code.
 		} // End function
 
+
         // Function that allows the users to choose easy mode
 		void easyMode()
 		{
@@ -470,11 +472,8 @@ class Snake
 					cout << "Invalid input" << endl;
 				}
 			}
-		}
-
-		// Function that shows the tutorial for the game
-
-};
+		}// End Function
+};// End Class
 
 // Class that deal with extra functions
 class ExtraFunctions
@@ -482,6 +481,8 @@ class ExtraFunctions
 	public:
         // Enumeration that contains better readability for status
 		enum eStatus {APPROVED = 0, DISAPPROVED, UNRECOGNIZED};
+
+
         // Function that prints out the tutorial
 		void tutorial()
 		{
@@ -493,7 +494,9 @@ class ExtraFunctions
 			cout << "Inspired from orignal code by N. Vitanovic, at https://www.youtube.com/watch?v=E_-lMZDi7Uw" << endl;
 			cout << "But I pretty much rewrote the most things" << endl;
 			cout << "************************************************************" << endl;
-		}
+		}// End Function
+
+
         // Function that can enable or disable cursor
 		void showCursor(bool wantCursor)
 		{
@@ -504,7 +507,9 @@ class ExtraFunctions
 			GetConsoleCursorInfo(out, &cursorInfo);
 			cursorInfo.bVisible = wantCursor; // Set the cursor visibility depending on the bool that is passed in
 			SetConsoleCursorInfo(out, &cursorInfo);
-		}
+		}// End Function
+
+
         // Function that takes in the user choice for replay
 		int replayPrompt()
 		{
@@ -530,9 +535,10 @@ class ExtraFunctions
 				cin.clear();
 				result = UNRECOGNIZED;
 			}
-
 			return result;
-		}
+		}// End Function
+
+
         // Function that replays the game depending on the result from replay prompt
 		void replay()
 		{
@@ -559,8 +565,8 @@ class ExtraFunctions
 				}
 			}
 		}// End Function
+};// End Class
 
-};
 
 // Main!
 int main()
@@ -603,10 +609,8 @@ int main()
         ext.showCursor(true); // Show the cursor again
 		ext.replay(); // Call replay from Extra Functions Class
 		system("cls"); // Clear the screen
-
 	}
-
-    return 0; // The end
+    return 0;
 } // End Main
 
 
