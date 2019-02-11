@@ -53,14 +53,14 @@ class Snake
 		{
 			// Draws 61 #s
 			// This is more efficient
-			cout << "#############################################################" << endl;
+			cout << "#############################################################" << "\n";
 
 			// This comment is a for loop for drawing the horizontal wall. Because this is inefficient then just printing a set amount of #s, I will leave it there.
 			// This may be used when width is changed.
 			/*
 			for (int wallCount = 0; wallCount < width+1; wallCount++)
 				cout << "#";
-			cout << endl;
+			cout << "\n";
 			*/
 		} // End function
 
@@ -128,18 +128,18 @@ class Snake
 					}
 				}// End loop
 				// Move on to the next row
-				cout << endl;
+				cout << "\n";
 			}// End loop
 			// Draw the bottom wall
 			drawHorizontalWall();
 			// Show the score of the player and other useful information
-			cout << "Score:" << score << endl;
+			cout << "Score:" << score << "\n";
 			// Shows the update delay and fps. FPS is calculated by 1000 / delay in milliseconds
-			cout << "Current updateDelay: " << updateDelay << " (FPS: " << 1000.0f / float(updateDelay) << ")" << endl;
-			cout << "WASD to move, eat the fruit to grow the snake as long as possible!" << endl;
-			cout << "Press '-' speed up the game and '=' to slow down the game" << endl;
-			cout << "Press 'p' to pause" << endl;
-			cout << "Press 'x' to exit" << endl;
+			cout << "Current updateDelay: " << updateDelay << " (FPS: " << 1000.0f / float(updateDelay) << ")" << "\n";
+			cout << "WASD to move, eat the fruit to grow the snake as long as possible!" << "\n";
+			cout << "Press '-' speed up the game and '=' to slow down the game" << "\n";
+			cout << "Press 'p' to pause" << "\n";
+			cout << "Press 'x' to exit" << "\n";
 		} // End Function
 
 
@@ -172,26 +172,26 @@ class Snake
 					case 'p': // Pause the game
 						pause = true;
 						break;
-					case '+': // Increase the amount of time the game sleeps before creating another frame
+					case '=': // Increase the amount of time the game sleeps before creating another frame
 						if (updateDelay < 200) // Max is 200
 						{
 							updateDelay += 20;
-							cout << "Increasing updateDelay to " << updateDelay << endl;
+							cout << "Increasing updateDelay to " << updateDelay << "\n";
 						}
 						else
 						{
-							cout << "updateDelay is already at maximum." << endl;
+							cout << "updateDelay is already at maximum." << "\n";
 						}
 						break;
 					case '-': // Decrease the amount of time the game sleeps before creating another frame
 						if (updateDelay > 20) // Minimum is 20
 						{
 							updateDelay -= 20;
-							cout << "Decreasing updateDelay to " << updateDelay << endl;
+							cout << "Decreasing updateDelay to " << updateDelay << "\n";
 						}
 						else
 						{
-							cout << "updateDelay is already at minimum." << endl;
+							cout << "updateDelay is already at minimum." << "\n";
 						}
 						break;
 					default:
@@ -362,7 +362,7 @@ class Snake
 				if (nTail > 2 && tailX[tailCount] == headX && tailY[tailCount] == headY)
 				{
 					gameover = true;
-					cout << "You hit your own tail!" << endl;
+					cout << "You hit your own tail!" << "\n";
        			}
    			}
 		}// End Function
@@ -417,7 +417,7 @@ class Snake
 
 			while (true)
 			{
-				cout << "Enter the number of fruits to be spawned, 1 to 5: " << endl;
+				cout << "Enter the number of fruits to be spawned, 1 to 5: " << "\n";
 				getline(cin, userChoiceOfFruit);
 
 				stringstream ssChoice(userChoiceOfFruit);
@@ -426,13 +426,13 @@ class Snake
 				if (!(ssChoice >> convertedChoiceOfFruit))
 				{
 					cin.clear();
-					cout << "Please enter a valid number" << endl;
+					cout << "Please enter a valid number" << "\n";
 					continue;
 				}
 				// Check if the input was between 1 to 5
 				else if (convertedChoiceOfFruit > 5 || convertedChoiceOfFruit < 1)
 				{
-					cout << "Please enter a number between 1 and 5" << endl;
+					cout << "Please enter a number between 1 and 5" << "\n";
 					continue;
 				}
 				else
@@ -453,7 +453,7 @@ class Snake
 			while (true)
 			{
 			    // Prompt user
-				cout << "Turn easymode - no gameover for hitting the wall - on? (y/n)" << endl;
+				cout << "Turn easymode - no gameover for hitting the wall - on? (y/n)" << "\n";
 				getline(cin, userChoice);
 
 				if (userChoice == "y" || userChoice == "Y")
@@ -469,7 +469,7 @@ class Snake
 				else
 				{   // Ask again if invalid input
 					cin.clear();
-					cout << "Invalid input" << endl;
+					cout << "Invalid input" << "\n";
 				}
 			}
 		}// End Function
@@ -486,14 +486,14 @@ class ExtraFunctions
         // Function that prints out the tutorial
 		void tutorial()
 		{
-			cout << "Welcome to C++ Snake!" << endl;
-			cout << "Use WASD to move, P to pause, and X to exit the game" << endl;
-			cout << "Use '-' to speed up the game and '+' to slow down the game" << endl;
-			cout << "Eating the fruit makes the snake longer. If you hit your own tail, the game will end." << endl;
-			cout << "Created by Yun Ho Jung, github.com/Dolcevice" << endl;
-			cout << "Inspired from orignal code by N. Vitanovic, at https://www.youtube.com/watch?v=E_-lMZDi7Uw" << endl;
-			cout << "But I pretty much rewrote the most things" << endl;
-			cout << "************************************************************" << endl;
+			cout << "Welcome to C++ Snake!" << "\n";
+			cout << "Use WASD to move, P to pause, and X to exit the game" << "\n";
+			cout << "Use '-' to speed up the game and '=' to slow down the game" << "\n";
+			cout << "Eating the fruit makes the snake longer. If you hit your own tail, the game will end." << "\n";
+			cout << "Created by Yun Ho Jung, github.com/Dolcevice" << "\n";
+			cout << "Inspired from orignal code by N. Vitanovic, at https://www.youtube.com/watch?v=E_-lMZDi7Uw" << "\n";
+			cout << "But I pretty much rewrote the most things" << "\n";
+			cout << "************************************************************" << "\n";
 		}// End Function
 
 
@@ -517,7 +517,7 @@ class ExtraFunctions
 			string userResponse;
 			eStatus result;
             // Prompt user
-			cout << "Would you like to play again? Enter 'y' to play again or 'n' to exit " << endl;
+			cout << "Would you like to play again? Enter 'y' to play again or 'n' to exit " << "\n";
 			// Get user choice
 			getline(cin, userResponse);
             // Branching check
@@ -551,7 +551,7 @@ class ExtraFunctions
 				if (userChoice == UNRECOGNIZED)
 				{
 				    // Loop again
-					cout << "Invalid input: " << endl;
+					cout << "Invalid input: " << "\n";
 				}
 				else if(userChoice == DISAPPROVED)
 				{
